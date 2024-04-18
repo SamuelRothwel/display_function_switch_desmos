@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <script src="https://www.desmos.com/api/v1.8/calculator.js?apiKey=dcb31709b452b1cf9dc26972add0fda6"></script>
+  <div id="calculator" style="width: 2000px; height: 2000px;"></div>
+  <script>
+    var elt = document.getElementById('calculator');
+    var calculator = Desmos.GraphingCalculator(elt);
+    const functions = ["tanh(x)","arctan(x)","x^3","1/(1+e^{-x})"];
+    var bool_tree = [];
+    var axis = [];
+    var outputString = "";
+    var len = functions.length;
+    var dimension = 0;
+    var x = 0;
+    while (len > 1) {
+      len = len/2;
+      dimension++;
+    }
+    for (let i = 0; i < dimension; i++){
+      axis += 'x'+i;
+      calculator.setExpression({ id: 'x'+i, latex:"x_"+i+'=2' });
+      calculator.setExpression({
+        id: "x"+i,
+        sliderBounds: { min: 0, max: 1, step: 0.25 }
+      });
+      bool_tree.push(false);
+    }
+    for (let j = 0; j < functions.length; j++)  {
+      var new_fun = "";
+      var l = 0;
+      for (var i = 0; i < bool_tree.length; i++) {
+        if (!bool_tree[i]) {
+          new_fun += "x_"+l+"*";
+          l++;
+        }
+        else {
+          new_fun += "(1-x_"+l+")*";
+          l++;
+        }
+      }
+      new_fun += functions[j];
+      outputString += "+"+new_fun;
+      for (var i = 0; i < bool_tree.length; i++) {
+        if (!bool_tree[i]){
+          bool_tree[i] = true;
+          if (i != 0) {
+            bool_tree[i-1] = false;
+          }
+          break;
+        }
+      }
+    }
+    outputString = outputString.substring(1);
+    calculator.setExpression({ id: 'line1', latex: outputString, color: '#ff0000' });
+  </script>
+</html>
